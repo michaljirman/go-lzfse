@@ -56,3 +56,20 @@ func DecodeBuffer(srcBuffer []byte) []byte {
 	__v := (uint)(__ret)
 	return dstBuffer[:__v]
 }
+
+
+func DecodeBufferNew(srcBuffer []byte) []byte {
+	csrcBuffer, _ := unpackPUint8String(string(srcBuffer))
+	csrcSize, _ := (C.size_t)(len(srcBuffer)), cgoAllocsUnknown
+
+	dstBuffer := make([]byte, 4*len(srcBuffer))
+	cdstBuffer, _ := (*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuffer)).Data)), cgoAllocsUnknown
+	cdstSize, _ := (C.size_t)(4*len(srcBuffer)), cgoAllocsUnknown
+
+	scratch := make([]byte, DecodeScratchSize())
+	cscratchBuffer, _ := unsafe.Pointer(&scratch[0]), cgoAllocsUnknown
+
+	__ret := C.lzfse_decode_buffer(cdstBuffer, cdstSize, csrcBuffer, csrcSize, cscratchBuffer)
+	__v := (uint)(__ret)
+	return dstBuffer[:__v]
+}
